@@ -1,24 +1,41 @@
+import { useState, use, Suspense } from 'react';
 import { faker } from '@faker-js/faker';
-import { Suspense, use, useState } from 'react';
 
-let news = [...new Array(4)].map(() => faker.lorem.sentence());
+export const RootPage = () => {
+  const [newsPromise, setNewsPromise] = useState(() => fetchNews());
 
-const fetchNews = () => {
-  return new Promise<string[]>((resolve) => {
-    setTimeout(() => {
-      news.unshift(faker.lorem.sentence());
-      resolve(news);
-    }, 1000);
-  });
+  const handleUpdate = () => {
+    fetchNews().then((news) => {
+      setNewsPromise(Promise.resolve(news));
+    });
+  };
+
+  return (
+    <>
+      <h3>News List <button onClick={handleUpdate}>Refresh</button></h3>
+      <NewsContainer newsPromise={newsPromise} />
+    </>
+  );
 };
 
-const NewsContainer = ({ newsPromise }) => (
-  <Suspense fallback={<p>Fetching the news...</p>}>
+const news = [...new Array(4)].map(() => faker.lorem.sentence());
+
+const fetchNews = () => new Promise<string[]>((resolve) => setTimeout(() => {
+  news.unshift(faker.lorem.sentence());
+  resolve(news);
+}, 1000));
+
+interface TProps {
+  newsPromise: Promise<string[]>;
+}
+
+const NewsContainer = ({ newsPromise }: TProps) => (
+  <Suspense fallback={<p>Loading...</p>}>
     <News newsPromise={newsPromise} />
   </Suspense>
 );
 
-const News = ({ newsPromise }) => {
+const News = ({ newsPromise }: TProps) => {
   const news = use<string[]>(newsPromise);
   return (
     <ul>
@@ -30,24 +47,5 @@ const News = ({ newsPromise }) => {
     </ul>
   );
 };
-
-function RootPage() {
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-expect-error
-  const [newsPromise, setNewsPromise] = useState<Promise<string[]>>(() => fetchNews);
-
-  const handleUpdate = () => {
-    fetchNews().then((news) => {
-      setNewsPromise(Promise.resolve(news));
-    });
-  };
-
-  return (<>
-    <h3>
-      Here is the news <button onClick={handleUpdate}>Refresh</button>
-    </h3>
-    <NewsContainer newsPromise={newsPromise} />
-  </>);
-}
 
 export default RootPage;
