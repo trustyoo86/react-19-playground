@@ -7,6 +7,7 @@ import './index.css'
 import RootPage from './pages/Root.tsx';
 import ShoppingCart from './pages/ShoppingCart.tsx';
 import FormState from './pages/FormState.tsx';
+import BatchingExample from './pages/BatchingExample.tsx';
 
 const theme = createTheme({
   palette: {
@@ -33,6 +34,10 @@ const router = createBrowserRouter([
     path: '/formstate',
     element: <FormState />
   },
+  {
+    path: '/batching',
+    element: <BatchingExample />
+  }
 ]);
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
